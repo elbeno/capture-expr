@@ -1,30 +1,33 @@
-#include "capture.h"
+//#include "capture.h"
+#include "capture-et.h"
 
 #include <iostream>
 #include <string>
 using namespace std;
 
-#define REQUIRE(x)                                              \
-  {                                                             \
-  cout << STRINGIFY(x) << endl;                                 \
-  auto cap = LHSCapture() ->* x;                                \
-  cout << cap.first.m_val;                                      \
-  if (cap.second.m_op != Op::NOOP) {                            \
-    cout << ' '                                                 \
-         << opstr[static_cast<int>(cap.second.m_op) - 1] << ' ' \
-         << cap.second.m_val;                                   \
-  }                                                             \
-  cout << endl;                                                 \
-  }
-
 int main(int, char* [])
 {
-  string s("Hello");
-  REQUIRE(s + ", world" == "Hello, world");
+  REQUIRE(5);
+  REQUIRE(5 + 2 == 7);
+  REQUIRE(5 - 2 == 3);
+  REQUIRE(5 + 2 * 2 == 9);
+  REQUIRE((6 / 2) % 2 == 1);
+  REQUIRE((16 >> 2) == 4);
+  REQUIRE((16 << 2) == 64);
+  REQUIRE(7 + 2 != 7);
+  REQUIRE(7 + 2 > 7);
+  REQUIRE(7 - 2 < 7);
+  REQUIRE(7 + 2 >= 7);
+  REQUIRE(7 - 2 <= 7);
 
+  string s("Hello");
+  REQUIRE(s + ", world" + " debug" == "Hello, world");
+
+  /*
   REQUIRE(3 * 5 > 3 * 4);
   REQUIRE(3 * 5 >= 3 * 4);
   REQUIRE(3 * 5 != 3 * 4);
   REQUIRE(3 * 3 < 3 * 4);
   REQUIRE(3 * 3 <= 3 * 4);
+  */
 }

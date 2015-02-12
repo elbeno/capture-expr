@@ -13,7 +13,7 @@ env = Environment(BUILDTYPE = buildType,
                   CPPPATH = [include],
                   LIBPATH = [lib])
 
-env.Append(CCFLAGS = "-g -std=c++1y")
+env.Append(CCFLAGS = "-O2 -std=c++1y")
 env.Append(CCFLAGS = ["-pedantic"
                       , "-Wall"
                       , "-Wextra"

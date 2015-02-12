@@ -1,13 +1,9 @@
 #pragma once
 
+// -----------------------------------------------------------------------------
 #include <utility>
 
-// -----------------------------------------------------------------------------
-#define XSTRINGIFY(a) STRINGIFY(a)
-#define STRINGIFY(a) #a
-
-// -----------------------------------------------------------------------------
-struct LHSCapture {};
+struct Capture {};
 
 template <typename T>
 struct LHS
@@ -53,7 +49,7 @@ struct RHS
 };
 
 template <typename T>
-std::pair<LHS<T>, RHS<int>> operator->*(const LHSCapture&, T&& t)
+std::pair<LHS<T>, RHS<int>> operator->*(const Capture&, T&& t)
 {
   return std::make_pair(LHS<T>(std::forward<T>(t)), RHS<int>(Op::NOOP, 0));
 }
@@ -96,3 +92,26 @@ LHS_COMP(>, GT)
 LHS_COMP(<, LT)
 LHS_COMP(>=, GTE)
 LHS_COMP(<=, LTE)
+
+// -----------------------------------------------------------------------------
+#include <iostream>
+
+#define STRINGIFY(a) #a
+
+#define REQUIRE(x)                                              \
+  {                                                             \
+    std::cout << STRINGIFY(x) << std::endl;                     \
+    auto cap = Capture() ->* x;                                 \
+    std::cout << cap.first.m_val << std::endl;                  \
+  }
+
+#if 0
+    if (cap.second.m_op != Op::NOOP) {                          \
+      std::cout << ' '                                          \
+                << opstr[static_cast<int>(cap.second.m_op) - 1] \
+                << ' '                                          \
+                << cap.second.m_val;                            \
+    }                                                           \
+    std::cout << std::endl;                                     \
+  }
+#endif
