@@ -24,7 +24,7 @@ struct LHSRecur
 {
   constexpr static auto value(T&& t) noexcept
   {
-    return t;
+    return std::forward<T>(t);
   }
 };
 
@@ -33,7 +33,7 @@ struct RHSRecur
 {
   constexpr static auto value(T&& t) noexcept
   {
-    return t;
+    return std::forward<T>(t);
   }
 };
 
@@ -52,75 +52,75 @@ struct RelOpRecur
 struct SecondOp
 {
   template <typename T, typename U>
-  constexpr static U compute(T&&, U&& u) noexcept
+  constexpr static U eval(T&&, U&& u) noexcept
   {
-    return u;
+    return std::forward<U>(u);
   }
 };
 
 // -----------------------------------------------------------------------------
-// Now, operations that we can compute by recursion into the expression.
+// Now, operations that we can eval by recursion into the expression.
 
 struct AddOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) + u;
+    return LHSRecur<T>::value(std::forward<T>(t)) + std::forward<U>(u);
   }
 };
 
 struct SubOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) - u;
+    return LHSRecur<T>::value(std::forward<T>(t)) - std::forward<U>(u);
   }
 };
 
 struct MulOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) * u;
+    return LHSRecur<T>::value(std::forward<T>(t)) * std::forward<U>(u);
   }
 };
 
 struct DivOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) / u;
+    return LHSRecur<T>::value(std::forward<T>(t)) / std::forward<U>(u);
   }
 };
 
 struct ModOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) % u;
+    return LHSRecur<T>::value(std::forward<T>(t)) % std::forward<U>(u);
   }
 };
 
 struct LShiftOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) << u;
+    return LHSRecur<T>::value(std::forward<T>(t)) << std::forward<U>(u);
   }
 };
 
 struct RShiftOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) >> u;
+    return LHSRecur<T>::value(std::forward<T>(t)) >> std::forward<U>(u);
   }
 };
 
@@ -131,54 +131,54 @@ struct RShiftOp
 struct EQOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) == u;
+    return LHSRecur<T>::value(std::forward<T>(t)) == std::forward<U>(u);
   }
 };
 
 struct NEOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) != u;
+    return LHSRecur<T>::value(std::forward<T>(t)) != std::forward<U>(u);
   }
 };
 
 struct LTOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) < u;
+    return LHSRecur<T>::value(std::forward<T>(t)) < std::forward<U>(u);
   }
 };
 
 struct GTOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) > u;
+    return LHSRecur<T>::value(std::forward<T>(t)) > std::forward<U>(u);
   }
 };
 
 struct LTEOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) <= u;
+    return LHSRecur<T>::value(std::forward<T>(t)) <= std::forward<U>(u);
   }
 };
 
 struct GTEOp
 {
   template <typename T, typename U>
-  constexpr static auto compute(T&& t, U&& u)
+  constexpr static auto eval(T&& t, U&& u)
   {
-    return LHSRecur<T>::value(std::forward<T>(t)) >= u;
+    return LHSRecur<T>::value(std::forward<T>(t)) >= std::forward<U>(u);
   }
 };
 
@@ -198,42 +198,20 @@ struct OpPair
 // -----------------------------------------------------------------------------
 // Now we have the operator overloads to capture each type.
 
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, SecondOp, T>> operator->*(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
+#define OP_OVERLOAD(OP, OP_NAME)                                        \
+  template <typename H, typename T>                                     \
+  constexpr inline Capture<OpPair<H, OP, T>> OP_NAME(                   \
+      Capture<H>&& head, T&& tail)                                      \
+  {                                                                     \
+    return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};   \
+  }
 
-// -----------------------------------------------------------------------------
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, AddOp, T>> operator+(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, SubOp, T>> operator-(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, MulOp, T>> operator*(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, DivOp, T>> operator/(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, ModOp, T>> operator%(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
+OP_OVERLOAD(SecondOp, operator->*)
+OP_OVERLOAD(AddOp, operator+)
+OP_OVERLOAD(SubOp, operator-)
+OP_OVERLOAD(MulOp, operator*)
+OP_OVERLOAD(DivOp, operator/)
+OP_OVERLOAD(ModOp, operator%)
 
 // -----------------------------------------------------------------------------
 // Overloading << and >> lowers their precedence to below relational ops. If we
@@ -242,84 +220,23 @@ constexpr inline Capture<OpPair<H, ModOp, T>> operator%(Capture<H>&& head, T&& t
 // around the << operands, which means these functions doesn't actually get
 // called. But they need to exist.
 
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, LShiftOp, T>> operator<<(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, RShiftOp, T>> operator>>(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
+OP_OVERLOAD(LShiftOp, operator<<)
+OP_OVERLOAD(RShiftOp, operator>>)
 
 // -----------------------------------------------------------------------------
 // Now, the relational ops.
 
-// -----------------------------------------------------------------------------
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, EQOp, T>> operator==(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
+OP_OVERLOAD(EQOp, operator==)
+OP_OVERLOAD(NEOp, operator!=)
+OP_OVERLOAD(LTOp, operator<)
+OP_OVERLOAD(GTOp, operator>)
+OP_OVERLOAD(LTEOp, operator<=)
+OP_OVERLOAD(GTEOp, operator>=)
 
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, NEOp, T>> operator!=(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, LTOp, T>> operator<(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, GTOp, T>> operator>(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, LTEOp, T>> operator<=(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
-
-template <typename H, typename T>
-constexpr inline Capture<OpPair<H, GTEOp, T>> operator>=(Capture<H>&& head, T&& tail)
-{
-  return {{ std::forward<H>(head.m_list), std::forward<T>(tail) }};
-}
+#undef OP_OVERLOAD
 
 // -----------------------------------------------------------------------------
-// Functions to extract the LHS, RHS and the relational op linking the sides.
-
-template <typename T>
-constexpr inline auto LHS(T&& c)
-{
-  using L = typename std::remove_reference_t<T>::type;
-  return LHSRecur<L>::value(std::forward<L>(c.m_list));
-}
-
-template <typename T>
-constexpr inline auto RHS(T&& c)
-{
-  using L = typename std::remove_reference_t<T>::type;
-  return RHSRecur<L>::value(std::forward<L>(c.m_list));
-}
-
-template <typename T>
-constexpr inline auto RelOp(T&& c)
-{
-  using L = typename std::remove_reference_t<T>::type;
-  return RelOpRecur<L>::value(std::forward<L>(c.m_list));
-}
-
-// -----------------------------------------------------------------------------
-// Recursing into the LHS. Compute the binary ops, and return the LHS for any
+// Recursing into the LHS. eval the binary ops, and return the LHS for any
 // relational ops.
 
 template <typename H, typename Op, typename T>
@@ -327,64 +244,29 @@ struct LHSRecur<OpPair<H, Op, T>>
 {
   constexpr static auto value(OpPair<H, Op, T>&& t)
   {
-    return Op::compute(std::forward<H>(t.m_pair.first),
-                       LHSRecur<T>::value(std::forward<T>(t.m_pair.second)));
+    return Op::eval(std::forward<H>(t.m_pair.first),
+                    LHSRecur<T>::value(std::forward<T>(t.m_pair.second)));
   }
 };
 
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, EQOp, T>>
-{
-  constexpr static auto value(OpPair<H, EQOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
+#define LHS_RECUR_SPECIALIZE(RELOP)                               \
+  template <typename H, typename T>                               \
+  struct LHSRecur<OpPair<H, RELOP, T>>                            \
+  {                                                               \
+    constexpr static auto value(OpPair<H, RELOP, T>&& t)          \
+    {                                                             \
+      return LHSRecur<H>::value(std::forward<H>(t.m_pair.first)); \
+    }                                                             \
+  };
 
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, NEOp, T>>
-{
-  constexpr static auto value(OpPair<H, NEOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
+LHS_RECUR_SPECIALIZE(EQOp)
+LHS_RECUR_SPECIALIZE(NEOp)
+LHS_RECUR_SPECIALIZE(LTOp)
+LHS_RECUR_SPECIALIZE(GTOp)
+LHS_RECUR_SPECIALIZE(LTEOp)
+LHS_RECUR_SPECIALIZE(GTEOp)
 
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, LTOp, T>>
-{
-  constexpr static auto value(OpPair<H, LTOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
-
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, GTOp, T>>
-{
-  constexpr static auto value(OpPair<H, GTOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
-
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, LTEOp, T>>
-{
-  constexpr static auto value(OpPair<H, LTEOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
-
-template <typename H, typename T>
-struct LHSRecur<OpPair<H, GTEOp, T>>
-{
-  constexpr static auto value(OpPair<H, GTEOp, T>&& t)
-  {
-    return LHSRecur<H>::value(std::forward<H>(t.m_pair.first));
-  }
-};
+#undef LHS_RECUR_SPECIALIZE
 
 // -----------------------------------------------------------------------------
 // Recursing into the RHS. Just return the RHS.
@@ -411,59 +293,48 @@ struct RelOpRecur<OpPair<H, Op, T>>
   }
 };
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, EQOp, T>>
-{
-  constexpr static auto value(OpPair<H, EQOp, T>&&)
-  {
-    return "==";
-  }
-};
+#define RHS_RECUR_SPECIALIZE(RELOP, OPSTR)             \
+  template <typename H, typename T>                    \
+  struct RelOpRecur<OpPair<H, RELOP, T>>               \
+  {                                                    \
+    constexpr static auto value(OpPair<H, RELOP, T>&&) \
+    {                                                  \
+      return OPSTR;                                    \
+    }                                                  \
+  };
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, NEOp, T>>
-{
-  constexpr static auto value(OpPair<H, NEOp, T>&&)
-  {
-    return "!=";
-  }
-};
+RHS_RECUR_SPECIALIZE(EQOp, "==")
+RHS_RECUR_SPECIALIZE(NEOp, "!=")
+RHS_RECUR_SPECIALIZE(LTOp, "<")
+RHS_RECUR_SPECIALIZE(GTOp, ">")
+RHS_RECUR_SPECIALIZE(LTEOp, "<=")
+RHS_RECUR_SPECIALIZE(GTEOp, ">=")
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, LTOp, T>>
-{
-  constexpr static auto value(OpPair<H, LTOp, T>&&)
-  {
-    return "<";
-  }
-};
+#undef RHS_RECUR_SPECIALIZE
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, GTOp, T>>
-{
-  constexpr static auto value(OpPair<H, GTOp, T>&&)
-  {
-    return ">";
-  }
-};
+// -----------------------------------------------------------------------------
+// Functions to extract the LHS, RHS and the relational op linking the sides.
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, LTEOp, T>>
+template <typename T>
+constexpr inline auto LHS(T&& c)
 {
-  constexpr static auto value(OpPair<H, LTEOp, T>&&)
-  {
-    return "<=";
-  }
-};
+  using L = typename std::remove_reference_t<T>::type;
+  return LHSRecur<L>::value(std::forward<L>(c.m_list));
+}
 
-template <typename H, typename T>
-struct RelOpRecur<OpPair<H, GTEOp, T>>
+template <typename T>
+constexpr inline auto RHS(T&& c)
 {
-  constexpr static auto value(OpPair<H, GTEOp, T>&&)
-  {
-    return ">=";
-  }
-};
+  using L = typename std::remove_reference_t<T>::type;
+  return RHSRecur<L>::value(std::forward<L>(c.m_list));
+}
+
+template <typename T>
+constexpr inline auto RelOp(T&& c)
+{
+  using L = typename std::remove_reference_t<T>::type;
+  return RelOpRecur<L>::value(std::forward<L>(c.m_list));
+}
 
 // -----------------------------------------------------------------------------
 #define STRINGIFY(a) #a
@@ -474,7 +345,7 @@ struct RelOpRecur<OpPair<H, GTEOp, T>>
     auto cap = Capture<Nothing>() ->* x;                                \
     std::cout << LHS(cap);                                              \
     auto relop = RelOp(cap);                                            \
-    if (relop != "")                                                    \
+    if (relop[0] != 0)                                                  \
       std::cout << ' ' << relop << ' ' << RHS(cap);                     \
     std::cout << std::endl;                                             \
   }
