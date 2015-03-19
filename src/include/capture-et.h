@@ -188,11 +188,8 @@ struct GTEOp
 template <class H, class Op, class T>
 struct OpPair
 {
-  constexpr OpPair(H&& h, T&& t)
-    : m_pair(std::forward<H>(h), std::forward<T>(t))
-  {}
-
-  std::pair<H,T> m_pair;
+  H m_head;
+  T m_tail;
 };
 
 // -----------------------------------------------------------------------------
@@ -244,8 +241,8 @@ struct LHSRecur<OpPair<H, Op, T>>
 {
   constexpr static auto value(OpPair<H, Op, T>&& t)
   {
-    return Op::eval(std::forward<H>(t.m_pair.first),
-                    LHSRecur<T>::value(std::forward<T>(t.m_pair.second)));
+    return Op::eval(std::forward<H>(t.m_head),
+                    LHSRecur<T>::value(std::forward<T>(t.m_tail)));
   }
 };
 
@@ -255,7 +252,7 @@ struct LHSRecur<OpPair<H, Op, T>>
   {                                                               \
     constexpr static auto value(OpPair<H, RELOP, T>&& t)          \
     {                                                             \
-      return LHSRecur<H>::value(std::forward<H>(t.m_pair.first)); \
+      return LHSRecur<H>::value(std::forward<H>(t.m_head));       \
     }                                                             \
   };
 
@@ -276,7 +273,7 @@ struct RHSRecur<OpPair<H, Op, T>>
 {
   constexpr static auto value(OpPair<H, Op, T>&& t)
   {
-    return RHSRecur<T>::value(std::forward<T>(t.m_pair.second));
+    return RHSRecur<T>::value(std::forward<T>(t.m_tail));
   }
 };
 
@@ -289,7 +286,7 @@ struct RelOpRecur<OpPair<H, Op, T>>
 {
   constexpr static auto value(OpPair<H, Op, T>&& t)
   {
-    return RelOpRecur<T>::value(std::forward<T>(t.m_pair.second));
+    return RelOpRecur<T>::value(std::forward<T>(t.m_tail));
   }
 };
 
